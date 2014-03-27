@@ -198,7 +198,16 @@ NSString * const kMagicalRecordImportAttributeUseDefaultValueWhenNotPresent = @"
         NSString *lookupKey = [[relationshipInfo userInfo] valueForKey:kMagicalRecordImportRelationshipMapKey] ?: relationshipName;
         id relatedObjectData = [relationshipData valueForKeyPath:lookupKey];
         
-        if (relatedObjectData == nil || [relatedObjectData isEqual:[NSNull null]]) 
+        __block NSString *relationshipAlternateName;
+        for (NSUInteger i = 1; i < 10 && (relatedObjectData == nil || [relatedObjectData isEqual:[NSNull null]]); i++)
+        {
+            relationshipAlternateName = [NSString stringWithFormat:@"%@.%lu", kMagicalRecordImportRelationshipMapKey, (unsigned long)i];
+            lookupKey = [[relationshipInfo userInfo] valueForKey:relationshipAlternateName];
+            
+            relatedObjectData = [relationshipData valueForKeyPath:lookupKey];
+        }
+        
+        if (relatedObjectData == nil || [relatedObjectData isEqual:[NSNull null]])
         {
             continue;
         }
